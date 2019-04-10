@@ -14,8 +14,11 @@ void insertNode(struct node * newNode, uint_8 index);
 void printNodes();
 void printAt(uint_8);
 void removeAt(uint_8);
+void printLastAt(uint_8);
 
 struct node * head = NULL;       // initialize a global head node pointing to NULL
+uint_8 numOfNodes;
+uint_32 len = 0;
 
 int main(void) {
     
@@ -52,11 +55,18 @@ int main(void) {
     scanf("%d", &idx);
     removeAt(idx);
     printNodes();                  // print the linked list nodes' data
+
+    puts("============== testing printLastAt() ==============");
+    printf("Pleas enter the index from last to print: ");
+    scanf("%d", &idx);
+    printLastAt(idx);
+
     return 0;
 }
 
 // add one node at the end of the linked list
 void addNode(struct node * newNode) {
+    len++;
     if (!head) {
         head = newNode;
         head->nextPtr = NULL;
@@ -112,12 +122,14 @@ void insertNode(struct node * newNode, uint_8 index) {
     if (index == 0) {
             newNode->nextPtr = head;
             head = newNode;
+            len++;           // increment the length of the linked list
             return;
     }
     while (1) {
         if (counter == index-1) {
             newNode->nextPtr = current->nextPtr;
             current->nextPtr = newNode;
+            len++;          // increment the length of the linked list
             break;
         }else if (counter < index) {
             if (current->nextPtr != NULL) {
@@ -137,6 +149,7 @@ void removeAt(uint_8 index) {
         temp = head->nextPtr;
         free(head);
         head = temp;
+        len--;          // decrement the length of the linked list
         return;
     }
     uint_8 counter = 0;
@@ -146,6 +159,7 @@ void removeAt(uint_8 index) {
             temp = current->nextPtr->nextPtr;
             free(current->nextPtr);
             current->nextPtr = temp;
+            len--;          // decrement the length of the linked list
             break;
         }else if (counter < index) {
             if (current->nextPtr != NULL) {
@@ -157,4 +171,10 @@ void removeAt(uint_8 index) {
             }
         }
     }
+}
+
+void printLastAt(uint_8 index) {
+    index = len - index - 1;
+    printAt(index);
+    //
 }
