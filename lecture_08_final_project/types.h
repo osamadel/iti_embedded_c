@@ -1,6 +1,6 @@
 #ifndef TYPES
 #define TYPES
-    typedef enum {PM2, PM230, PM3, PM4, PM430} Slot;
+    typedef enum {PM2=1, PM230, PM3, PM4, PM430} Slot;
 
     struct Patient {
         unsigned int    ID;
@@ -9,9 +9,8 @@
         char            gender;
     };
 
-    struct TimeSlot
-    {
-        unsigned int ID;
-        Slot time;
-    };
+    // struct TimeSlot
+    // {
+    //     unsigned int ID;
+    // };
 #endif

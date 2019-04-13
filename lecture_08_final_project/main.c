@@ -6,5 +6,6 @@ int main(void) {
     welcomeScreen();
     printf("\n====== Printing All Recrods =======");
     viewAllRecords();
+    displayAvailableSlots();
     return 0;
 }

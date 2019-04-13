@@ -16,20 +16,30 @@ void welcomeScreen(void) {
         scanf("%d", &mode);
         if (mode == 1) {adminMode(); break;}    // go to Admin Mode prompt and break after you finish
         else if (mode == 2) {userMode(); break;} // go to User Mode prompt and break after you finish
-        else puts ("Incorrect Mode. Please choose one of the available modes.");
+        else puts ("**** Incorrect Mode ****\n**** Please choose one of the available modes ****");
     }
     
 }
-
+/*  prompt the user with 5 options:
+    (1) add a new patient
+    (2) edit a registered patient
+    (3) reserve a time slot
+    (4) cancel a reservation
+    (5) terminate the program
+    This functions prompts the user after his selection with the appropriate
+    message, receiving input from the user and passing the values to specialized
+    functions */
 void promptAdminOptions(void) {
     char patientName[20];
     char patientGender;
     unsigned int patientAge;
     unsigned int id;
+    unsigned int slotChoice = 0;
+    char IDfound = 0;
 
     char option = 0;
     while (1) {
-        puts("Please choose one of the following options:");
+        puts("\nPlease choose one of the following options:");
         puts("(1) Add a new patient");
         puts("(2) Edit a current patient");
         puts("(3) Reserve a slot");
@@ -91,11 +101,46 @@ void promptAdminOptions(void) {
                     puts("**** Patient was edited successfully ****");
                 break;
             case 3:
-                // reserveSlot();
-                return;
+                while (1) {
+                    puts("Please choose one of the available time slots:");
+                    displayAvailableSlots();
+                    scanf("%d", &slotChoice);
+                    if (slotChoice < 1 || slotChoice > 5) {
+                        puts("**** Invalid choice ****");
+                        continue;
+                    }else break;
+                }
+                while (1) {
+                    printf("\nPlease enter the patient's ID: ");
+                    scanf("%d", &id);
+                    // Check if the provided ID is a patient's ID
+                    for (int i=0; i<numberOfPatients; i++)
+                        if (headPatient[i].ID == id) IDfound = 1;
+                    if (!IDfound) {
+                        puts("**** This ID is not a registered patient's ID ****");
+                        continue;
+                    }
+
+                    // check of this ID is already registered for the provided time slot
+                    if (reserveSlot(id, slotChoice) == -1) {
+                        puts("**** This ID is already registered for this time slot ****");
+                        continue;
+                    }else break;
+                }
+                // if this line is reached, then the reservation is done successfully
+                puts("**** Time Slot Reserved Successfully ****");
+                break;
             case 4:
-                // cancelReservation();
-                return;
+                while (1) {
+                    printf("\nPlease enter a patient's ID to cancel his reservation: ");
+                    scanf("%d", &id);
+                    if (cancelReservation(id) == -1) {
+                        puts("**** There is no time slot reserved with this ID ****");
+                        continue;
+                    }else break;
+                }
+                puts("**** Cancellation Successful ****");
+                break;
             case 5:
                 return;
             default:
@@ -115,14 +160,14 @@ void adminMode(void) {
         if (password != PASSWORD) {
             printf ("**** Wrong Passowrd ****\nYou have %d trials left.\n", MAX_PASSWORD_TRIALS - trialsCounter - 1);
         }else{
-            puts ("**** Logged in as Admin successfully ****");
+            puts ("\n**** Logged in as Admin successfully ****\n");
             exceededMaxTrials = 0;
             break;
         }
     }
 
     if (exceededMaxTrials) {
-        puts ("**** You exceeded the maximum number of trials to enter the correct password ****");
+        puts ("\n**** You exceeded the maximum number of trials to enter the correct password ****\n");
         puts ("- Systems is terminating -");
         return;
     }else{
@@ -141,12 +186,12 @@ int addPatient (unsigned int id, char * patientName, unsigned int patientAge, ch
         // "realloc can be really slow" -> check if this is true
         headPatient = (struct Patient *) realloc(headPatient, ++numberOfPatients * sizeof(struct Patient));
     }
-    strcpy(headPatient[numberOfPatients - 1].name, patientName);    
-    headPatient[numberOfPatients - 1].age = patientAge;
-    headPatient[numberOfPatients - 1].gender = patientGender;
     for (int i=0; i < numberOfPatients; i++)
         if (headPatient[i].ID == id)
             return -1;      // the id is repeated
+    strcpy(headPatient[numberOfPatients - 1].name, patientName);    
+    headPatient[numberOfPatients - 1].age = patientAge;
+    headPatient[numberOfPatients - 1].gender = patientGender;
     headPatient[numberOfPatients - 1].ID = id;
     return 0;
 }
@@ -165,21 +210,32 @@ int editPatient (unsigned int id, char * patientName, unsigned int patientAge, c
 }
 
 void displayAvailableSlots (void) {
-
+    for (int i=0; i<NUMBER_TIME_SLOTS; i++) {
+        if (timeSlots[i] == 0)
+            printf("(%d) %s\n", i+1, slots[i]);
+    }
 }
 
 int reserveSlot (unsigned int id, Slot time) {
-
+    /* assume that time will take a value 1,2,3,4 or 5 */
+    if (timeSlots[time - 1] == id) return -1;     // if the id is already reserving this time slot, return -1
+    else timeSlots[time - 1] = id;                // otherwise, assign this id to this time slot
+    return 0;
 }
 
 int cancelReservation (unsigned int id) {
-
+    for (int i=0; i<NUMBER_TIME_SLOTS; i++) {
+        if (timeSlots[i] == id) {
+            timeSlots[i] = 0;
+            return 0;
+        }
+    }
+    return -1;
 }
 
 void viewRecord (unsigned int id) {
     for (int i = 0; i < numberOfPatients; i++) {
         if (headPatient[i].ID == id) {
-            puts("");
             printf("ID:%\t\t%d\n", headPatient[i].ID);
             printf("NAME:%\t\t%s\n", headPatient[i].name);
             printf("AGE:%\t\t%d\n", headPatient[i].age);
