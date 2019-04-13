@@ -12,10 +12,12 @@ void welcomeScreen(void) {
     while (1) {
         puts ("(1) Admin Mode.");
         puts ("(2) User Mode.");
+        puts ("(3) Terminate.");
         printf(">> ");
         scanf("%d", &mode);
-        if (mode == 1) {adminMode(); break;}    // go to Admin Mode prompt and break after you finish
-        else if (mode == 2) {userMode(); break;} // go to User Mode prompt and break after you finish
+        if (mode == 1) {adminMode(); /* break; */}    // go to Admin Mode prompt and break after you finish
+        else if (mode == 2) {userMode(); /* break; */} // go to User Mode prompt and break after you finish
+        else if (mode == 3) {break;} // go to User Mode prompt and break after you finish
         else puts ("**** Incorrect Mode ****\n**** Please choose one of the available modes ****");
     }
     
@@ -44,7 +46,7 @@ void promptAdminOptions(void) {
         puts("(2) Edit a current patient");
         puts("(3) Reserve a slot");
         puts("(4) Cancel a reservation");
-        puts("(5) Terminate");
+        puts("(5) Back");
         puts("------------------------");
         printf(">> ");
         scanf("%d", &option);
@@ -104,29 +106,28 @@ void promptAdminOptions(void) {
                 while (1) {
                     puts("Please choose one of the available time slots:");
                     displayAvailableSlots();
+                    puts("");
                     scanf("%d", &slotChoice);
                     if (slotChoice < 1 || slotChoice > 5) {
                         puts("**** Invalid choice ****");
                         continue;
                     }else break;
                 }
-                while (1) {
-                    printf("\nPlease enter the patient's ID: ");
-                    scanf("%d", &id);
-                    // Check if the provided ID is a patient's ID
-                    for (int i=0; i<numberOfPatients; i++)
-                        if (headPatient[i].ID == id) IDfound = 1;
-                    if (!IDfound) {
-                        puts("**** This ID is not a registered patient's ID ****");
-                        continue;
-                    }
-
+                
+                printf("\nPlease enter the patient's ID: ");
+                scanf("%d", &id);
+                // Check if the provided ID is a patient's ID
+                for (int i=0; i<numberOfPatients; i++)
+                    if (headPatient[i].ID == id) IDfound = 1;
+                if (!IDfound) {
+                    puts("**** This ID is not a registered patient's ID ****");
+                    continue;
+                }
                     // check of this ID is already registered for the provided time slot
                     if (reserveSlot(id, slotChoice) == -1) {
                         puts("**** This ID is already registered for this time slot ****");
                         continue;
-                    }else break;
-                }
+                    }
                 // if this line is reached, then the reservation is done successfully
                 puts("**** Time Slot Reserved Successfully ****");
                 break;
@@ -176,7 +177,41 @@ void adminMode(void) {
 }
 
 void userMode(void) {
-    puts("User Mode Successful");
+    // puts("User Mode Successful");
+    char option = 0;
+    unsigned int id = 0;
+    int foundID = 0;
+    while (1) {
+        puts("\nPlease choose one of the following options:");
+        puts("(1) View patient record");
+        puts("(2) View today's reservations");
+        puts("(3) Back");
+        scanf("%d", &option);
+        switch (option)
+        {
+        case 1:
+            while (1) {
+                puts("Please enter the patient's ID: ");
+                scanf("%d", &id);
+                for (int i=0; i<numberOfPatients; i++)
+                    if (headPatient[i].ID == id) foundID = 1;
+                if (!foundID) {
+                    puts("**** There is no patient registered with this ID ****");
+                    continue;
+                }else break;
+            }
+            viewRecord(id);
+            break;
+        case 2:
+            viewReservations();
+            break;
+        case 3:
+            return;
+        default:
+            puts("**** Invalid Option ****");
+            return;
+        }
+    }
 }
 
 int addPatient (unsigned int id, char * patientName, unsigned int patientAge, char patientGender) {
@@ -212,7 +247,7 @@ int editPatient (unsigned int id, char * patientName, unsigned int patientAge, c
 void displayAvailableSlots (void) {
     for (int i=0; i<NUMBER_TIME_SLOTS; i++) {
         if (timeSlots[i] == 0)
-            printf("(%d) %s\n", i+1, slots[i]);
+            printf("\n(%d) %s", i+1, slots[i]);
     }
 }
 
@@ -247,7 +282,15 @@ void viewRecord (unsigned int id) {
 }
 
 void viewReservations (void) {
-    
+    int noReservations = 0;
+    for (int i=0; i<NUMBER_TIME_SLOTS; i++) {
+        if (timeSlots[i] != 0) {
+            printf("\nID %d reserved slot %s", timeSlots[i], slots[i]);
+            noReservations = 1;
+        }
+    }
+    if (!noReservations)
+        puts("**** No reservations for today ****");
 }
 
 void viewAllRecords(void) {
