@@ -251,7 +251,7 @@ void displayAvailableSlots (void) {
     }
 }
 
-int reserveSlot (unsigned int id, Slot time) {
+int reserveSlot (unsigned int id, unsigned int time) {
     /* assume that time will take a value 1,2,3,4 or 5 */
     if (timeSlots[time - 1] == id) return -1;     // if the id is already reserving this time slot, return -1
     else timeSlots[time - 1] = id;                // otherwise, assign this id to this time slot
